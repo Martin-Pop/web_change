@@ -42,14 +42,3 @@ class DatabaseAccess:
     def close(self):
         if self.connection:
             self.connection.close()
-
-def get_db_structure():
-    return """
-        CREATE TABLE IF NOT EXISTS endpoints (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            url TEXT NOT NULL,
-            hash TEXT,
-            last_check TEXT,
-            active INTEGER DEFAULT 1
-        );
-    """
