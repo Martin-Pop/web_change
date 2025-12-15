@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <h1>Monitored sites</h1>
+
+    <form action="/add_endpoint" method="POST" class="add-form">
+        <input type="url" name="url_input" placeholder="insert URL (https://google.com)" required>
+        <input type="number" name="time_interval" placeholder="interval (sec)" value="60" min="1" max="2147483647">
+        <button type="submit" class="btn-add">Add</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50%;">URL</th>
+                <th style="width: 15%; text-align: center;">Interval (s)</th>
+                <th style="width: 35%; text-align: center; padding-right: 45px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for endpoint in endpoints %}
+            <tr id="row-{{ endpoint.id }}">
+                <td>
+                    <a href="{{ endpoint.url }}" target="_blank" id="url">{{ endpoint.url}}</a>
+                </td>
+
+                <td style="text-align: center;" class="interval-value">
+                    {{ endpoint.check_interval }}
+                </td>
+
+                <td style="display: flex; justify-content: center; gap: 20px; align-items: center;">
+                    <form action="{{ url_for('delete_endpoint', endpoint_id=endpoint.id) }}" method="POST" style="margin:0;">
+                        <button type="submit" class="btn-delete">delete</button>
+                    </form>
+
+                    <button type="button"
+                            class="btn-change-interval"
+                            onclick="editInterval('{{ endpoint.id }}', '{{ endpoint.time_interval }}')">
+                        change interval
+                    </button>
+
+                    <form action="#" method="POST" style="margin:0;">
+                         <button type="submit" class="btn-statistics">statistics</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" style="text-align: center; color: #777;">
+                    No endpoints.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for
 import threading
+
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from backend.monitoring import EndpointMonitor
 
 app = Flask(__name__)
@@ -30,8 +31,22 @@ def delete_endpoint(endpoint_id):
     return redirect(url_for('dashboard'))
 
 
+@app.route('/update_interval/<int:endpoint_id>', methods=['POST'])
+def update_interval(endpoint_id):
+    #Todo: finish this endpoint
+    data = request.get_json()
+    new_interval = data.get('time_interval')
+
+    if not new_interval:
+        return jsonify({"error": "No interval provided"}), 400
+
+    print('updating interval')
+
+    return jsonify({"success": True, "new_interval": new_interval})
+
+
 if __name__ == '__main__':
     monitor_thread = threading.Thread(target=start_background_monitor, daemon=True)
     monitor_thread.start()
-    app.run(debug=True, use_reloader=False)
 
+    app.run(debug=True, use_reloader=False)
