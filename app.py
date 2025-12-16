@@ -33,14 +33,14 @@ def delete_endpoint(endpoint_id):
 
 @app.route('/update_interval/<int:endpoint_id>', methods=['POST'])
 def update_interval(endpoint_id):
-    #Todo: finish this endpoint
     data = request.get_json()
     new_interval = data.get('time_interval')
 
     if not new_interval:
         return jsonify({"error": "No interval provided"}), 400
 
-    print('updating interval')
+    #print('updating interval')
+    monitor.update_check_interval(endpoint_id, new_interval)
 
     return jsonify({"success": True, "new_interval": new_interval})
 

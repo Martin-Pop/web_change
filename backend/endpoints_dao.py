@@ -47,3 +47,6 @@ class EndpointDAO:
             "UPDATE pages SET next_check = ? WHERE id = ?",
             (next_check_time, page_id)
         )
+
+    def update_interval(self, page_id, interval):
+        self.db.execute("UPDATE pages SET check_interval = ? WHERE id = ?", (interval, page_id))

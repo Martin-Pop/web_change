@@ -19,6 +19,10 @@ class EndpointMonitor:
     def get_all_endpoints(self):
         return self.dao.get_all_endpoints()
 
+    def update_check_interval(self, page_id, interval):
+        self.dao.update_interval(page_id, interval)
+        self.dao.reschedule_check(page_id, 0)
+
     def process_endpoint(self, page, current_time):
         url = page['url']
         page_id = page['id']
