@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from flask_socketio import SocketIO, emit, join_room
+from flask_socketio import SocketIO, join_room
 from dotenv import load_dotenv
 import os, datetime
 from backend.monitoring import EndpointMonitor
@@ -7,11 +7,9 @@ from backend.websocket_client import WebsocketClient
 
 load_dotenv()
 
-WS_CONNECT_ENDPOINT = "wss://localhost:7076/ws/connect"
-
 app = Flask(__name__)
 socketio = SocketIO(app)
-ws_client = WebsocketClient(WS_CONNECT_ENDPOINT, os.getenv("WS_TOKEN"))
+ws_client = WebsocketClient(os.getenv("WS_CONNECT_ENDPOINT"), os.getenv("WS_TOKEN"))
 ws_client.start()
 
 def notify_stat_update(endpoint_id, new_data):

@@ -39,12 +39,13 @@ class EndpointMonitor:
         interval = page['check_interval']
 
         print(f"Checking {url}...")
-        resp = self.ws.send_message(f'checking this url: {url}', 1, 'Info')
+        self.ws.send_message(f'Checking url: {url}', 1, 'Info')
         new_hash = get_page_hash(url)
         if new_hash:
             changed = (old_hash and new_hash != old_hash) or old_hash is None
             if changed:
                 self.dao.add_change_record(page_id, 1, current_time)
+                self.ws.send_message(f'Detected change on: {url}', 1, 'Warning')
                 print(f"!!! CHANGE DETECTED: {url} !!!")
             else:
                 self.dao.add_change_record(page_id, 0, current_time)
@@ -56,6 +57,7 @@ class EndpointMonitor:
             self.dao.update_check_result(page_id, new_hash, next_check)
         else:
             print(f"Failed to fetch {url}, retrying shortly")
+            self.ws.send_message(f'Failed to fetch: {url}', 1, 'Error')
             retry_time = current_time + 60
             self.dao.reschedule_check(page_id, retry_time)
 
