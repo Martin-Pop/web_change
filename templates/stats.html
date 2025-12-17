@@ -22,7 +22,7 @@
                 <th style="width: 40%; text-align: center;">Changes Detected</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="stats-body">
             {% if statistics %}
                 {% if statistics is mapping %}
                     <tr>
@@ -37,8 +37,8 @@
                         <td>{{ entry.date | format_datetime }}</td>
                         <td style="text-align: center;">
                             {% if entry.change_detected == 1 %}
-                            <strong style="color: #d9534f;">YES</strong> {% else %}
-                            <span style="color: #5cb85c;">No change</span> {% endif %}
+                            <strong class="changed">YES</strong> {% else %}
+                            <span class="not_changed">No</span> {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -52,7 +52,28 @@
             {% endif %}
         </tbody>
     </table>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+    const socket = io();
+    const endpoint_id = "{{ endpoint_id }}";
+    socket.emit('join', {endpoint_id: endpoint_id});
 
+    socket.on('new_stat', function(data) {
+        const tableBody = document.getElementById('stats-body');
+        const newRow = tableBody.insertRow(0);
+
+        const d = new Date(data.date * 1000);
+        const dateStr = d.getDate().toString().padStart(2, '0') + '.' +
+                    (d.getMonth() + 1).toString().padStart(2, '0') + '.' +
+                    d.getFullYear() + ' ' +
+                    d.getHours().toString().padStart(2, '0') + ':' +
+                    d.getMinutes().toString().padStart(2, '0');
+        const status = data.change_detected ? 'YES' : 'No';
+        const class_name = data.change_detected ? 'changed' : 'not_changed'
+
+        newRow.innerHTML = `<td>${dateStr}</td><td style="text-align: center;" class=${class_name}>${status}</td>`;
+    });
+</script>
 <!--    <script src="{{ url_for('static', filename='script.js') }}"></script>-->
 </body>
 </html>

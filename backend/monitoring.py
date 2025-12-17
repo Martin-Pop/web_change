@@ -5,10 +5,11 @@ from .endpoints_dao import EndpointDAO
 
 class EndpointMonitor:
 
-    def __init__(self, ws_client):
+    def __init__(self, ws_client, notify_stat_update):
         self.dao = EndpointDAO()
         self.running = False
         self.ws = ws_client
+        self.notify = notify_stat_update
 
     def start(self):
         threading.Thread(target=self.run, daemon=True).start()
@@ -41,12 +42,15 @@ class EndpointMonitor:
         resp = self.ws.send_message(f'checking this url: {url}', 1, 'Info')
         new_hash = get_page_hash(url)
         if new_hash:
-            if (old_hash and new_hash != old_hash) or old_hash is None:
+            changed = (old_hash and new_hash != old_hash) or old_hash is None
+            if changed:
                 self.dao.add_change_record(page_id, 1, current_time)
                 print(f"!!! CHANGE DETECTED: {url} !!!")
             else:
                 self.dao.add_change_record(page_id, 0, current_time)
                 print(f"!!! CHANGE NOT DETECTED: {url} !!!")
+
+            self.notify(page_id, {'date': current_time, 'change_detected': changed})
 
             next_check = current_time + interval
             self.dao.update_check_result(page_id, new_hash, next_check)

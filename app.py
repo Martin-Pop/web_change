@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask_socketio import SocketIO, emit, join_room
 from dotenv import load_dotenv
 import os, datetime
 from backend.monitoring import EndpointMonitor
@@ -9,15 +10,25 @@ load_dotenv()
 WS_CONNECT_ENDPOINT = "wss://localhost:7076/ws/connect"
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 ws_client = WebsocketClient(WS_CONNECT_ENDPOINT, os.getenv("WS_TOKEN"))
 ws_client.start()
-monitor = EndpointMonitor(ws_client)
 
+def notify_stat_update(endpoint_id, new_data):
+    socketio.emit('new_stat', new_data, room=f"stats_{endpoint_id}")
+
+monitor = EndpointMonitor(ws_client, notify_stat_update)
+
+@socketio.on('join')
+def on_join(data):
+    room = f"stats_{data['endpoint_id']}"
+    join_room(room)
+
+#routes
 @app.route('/')
 def dashboard():
     all_endpoints = monitor.get_all_endpoints()
     return render_template('index.html', endpoints=all_endpoints)
-
 
 @app.route('/add_endpoint', methods=['POST'])
 def add_endpoint():
@@ -52,8 +63,9 @@ def update_interval(endpoint_id):
 def stats(endpoint_id):
 
     statistics = monitor.get_statistics(endpoint_id)
-    return render_template('stats.html', statistics=statistics)
+    return render_template('stats.html', statistics=statistics, endpoint_id=endpoint_id)
 
+#filter
 @app.template_filter('format_datetime')
 def format_datetime(value):
     return datetime.datetime.fromtimestamp(value).strftime('%d.%m.%Y %H:%M')
@@ -61,4 +73,5 @@ def format_datetime(value):
 if __name__ == '__main__':
     monitor.start()
 
-    app.run(debug=True, use_reloader=False)
+    #app.run(debug=True, use_reloader=False)
+    socketio.run(app, debug=True, use_reloader=False, allow_unsafe_werkzeug=True)
