@@ -80,6 +80,9 @@ button {
 
 .btn-change-interval {
     background: #007bff;
+    display: inline-block;
+    color: white;
+    font-weight: 600;
 }
 
 .btn-change-interval:hover {
