@@ -126,4 +126,5 @@ table tbody tr:last-child td {
 
 .not_changed {
     color: green;
+    font-weight: 600;
 }
