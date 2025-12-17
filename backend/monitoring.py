@@ -1,13 +1,17 @@
-import time
+import time, threading
 from .downloader import get_page_hash
 from .endpoints_dao import EndpointDAO
 
 
 class EndpointMonitor:
 
-    def __init__(self):
+    def __init__(self, ws_client):
         self.dao = EndpointDAO()
         self.running = False
+        self.ws = ws_client
+
+    def start(self):
+        threading.Thread(target=self.run, daemon=True).start()
 
     def add_to_monitor(self, url, interval=60):
         current_time = int(time.time())
@@ -30,7 +34,8 @@ class EndpointMonitor:
         interval = page['check_interval']
 
         print(f"Checking {url}...")
-
+        resp = self.ws.send_message(f'checking this url: {url}', 1, 'Info')
+        print(resp)
         new_hash = get_page_hash(url)
 
         if new_hash:

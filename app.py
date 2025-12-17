@@ -1,13 +1,17 @@
-import threading
-
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from dotenv import load_dotenv
+import os
 from backend.monitoring import EndpointMonitor
+from backend.websocket_client import WebsocketClient
+
+load_dotenv()
+
+WS_CONNECT_ENDPOINT = "wss://localhost:7076/ws/connect"
 
 app = Flask(__name__)
-monitor = EndpointMonitor()
-
-def start_background_monitor():
-    monitor.run()
+ws_client = WebsocketClient(WS_CONNECT_ENDPOINT, os.getenv("WS_TOKEN"))
+ws_client.start()
+monitor = EndpointMonitor(ws_client)
 
 @app.route('/')
 def dashboard():
@@ -39,14 +43,12 @@ def update_interval(endpoint_id):
     if not new_interval:
         return jsonify({"error": "No interval provided"}), 400
 
-    #print('updating interval')
     monitor.update_check_interval(endpoint_id, new_interval)
 
     return jsonify({"success": True, "new_interval": new_interval})
 
 
 if __name__ == '__main__':
-    monitor_thread = threading.Thread(target=start_background_monitor, daemon=True)
-    monitor_thread.start()
+    monitor.start()
 
     app.run(debug=True, use_reloader=False)

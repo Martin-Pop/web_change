@@ -6,10 +6,11 @@ CREATE_USER_ENDPOINT = BASE_URL + "/api/users/create"
 
 USER_DATA_FORM = {
     "Id": 0, 
-    "Name": "test_aiohttp_user", 
-    "AccessKey": "ws_secure_pass", 
+    "Name": "user1",
+    "AccessKey": "pass",
     "Messages": '{"text":"Initial message","magnitude":1,"type":1}' 
 }
+#SAHZT61D3R9MUDFG8
 
 def create_user_and_get_token():
     try:
