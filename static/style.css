@@ -83,6 +83,7 @@ button {
     display: inline-block;
     color: white;
     font-weight: 600;
+    border-radius: 4px;
 }
 
 .btn-change-interval:hover {
