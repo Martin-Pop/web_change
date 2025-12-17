@@ -45,7 +45,7 @@
                         change interval
                     </button>
 
-                    <form action="#" method="POST" style="margin:0;">
+                    <form action="{{ url_for('stats', endpoint_id=endpoint.id) }}" method="GET" style="margin:0;">
                          <button type="submit" class="btn-statistics">statistics</button>
                     </form>
                 </td>

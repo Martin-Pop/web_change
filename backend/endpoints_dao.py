@@ -18,6 +18,16 @@ class EndpointDAO:
                 );
             """)
 
+        self.db.execute("""
+            CREATE TABLE IF NOT EXISTS changes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                page_id INTEGER NOT NULL,
+                change_detected INTEGER NOT NULL,
+                date INTEGER,
+                FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE
+            );
+        """)
+
     def get_all_endpoints(self):
         return self.db.fetch_all("SELECT * FROM pages ORDER BY id DESC")
 
@@ -50,3 +60,9 @@ class EndpointDAO:
 
     def update_interval(self, page_id, interval):
         self.db.execute("UPDATE pages SET check_interval = ? WHERE id = ?", (interval, page_id))
+
+    def add_change_record(self, page_id, change_detected, date):
+        self.db.execute("INSERT INTO changes (page_id, change_detected, date) VALUES (?, ?, ?)",(page_id, change_detected, date))
+
+    def get_changes(self, page_id):
+        return self.db.fetch_all("SELECT * FROM changes WHERE page_id = ? ORDER BY date DESC", (page_id,))

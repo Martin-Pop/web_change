@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from dotenv import load_dotenv
-import os
+import os, datetime
 from backend.monitoring import EndpointMonitor
 from backend.websocket_client import WebsocketClient
 
@@ -22,9 +22,10 @@ def dashboard():
 @app.route('/add_endpoint', methods=['POST'])
 def add_endpoint():
     url_to_add = request.form.get('url_input')
+    interval = request.form.get("time_interval", type=int)
 
     if url_to_add:
-        monitor.add_to_monitor(url_to_add)
+        monitor.add_to_monitor(url_to_add, interval)
     return redirect(url_for('dashboard'))
 
 
@@ -47,6 +48,15 @@ def update_interval(endpoint_id):
 
     return jsonify({"success": True, "new_interval": new_interval})
 
+@app.route('/stats/<int:endpoint_id>', methods=['GET'])
+def stats(endpoint_id):
+
+    statistics = monitor.get_statistics(endpoint_id)
+    return render_template('stats.html', statistics=statistics)
+
+@app.template_filter('format_datetime')
+def format_datetime(value):
+    return datetime.datetime.fromtimestamp(value).strftime('%d.%m.%Y %H:%M')
 
 if __name__ == '__main__':
     monitor.start()

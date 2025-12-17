@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistics - Monitoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <h1>Statistics for Endpoint #{{ endpoint_id }}</h1>
+
+    <div style="margin-bottom: 20px;">
+        <a href="/" class="btn-change-interval" style="text-decoration: none; padding: 10px 20px;">
+            &larr; Back to Monitoring
+        </a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 60%;">Date and Time</th>
+                <th style="width: 40%; text-align: center;">Changes Detected</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if statistics %}
+                {% if statistics is mapping %}
+                    <tr>
+                        <td>{{ statistics.date }}</td>
+                        <td style="text-align: center;">
+                            <strong>{{ statistics.change_detected }}</strong>
+                        </td>
+                    </tr>
+                {% else %}
+                    {% for entry in statistics %}
+                    <tr>
+                        <td>{{ entry.date | format_datetime }}</td>
+                        <td style="text-align: center;">
+                            {% if entry.change_detected == 1 %}
+                            <strong style="color: #d9534f;">YES</strong> {% else %}
+                            <span style="color: #5cb85c;">No change</span> {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            {% else %}
+            <tr>
+                <td colspan="2" style="text-align: center; color: #777;">
+                    No statistics recorded yet.
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+<!--    <script src="{{ url_for('static', filename='script.js') }}"></script>-->
+</body>
+</html>

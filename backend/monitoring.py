@@ -27,6 +27,10 @@ class EndpointMonitor:
         self.dao.update_interval(page_id, interval)
         self.dao.reschedule_check(page_id, 0)
 
+    def get_statistics(self, page_id):
+        #changes = self.dao.get_changes(page_id)
+        return self.dao.get_changes(page_id)
+
     def process_endpoint(self, page, current_time):
         url = page['url']
         page_id = page['id']
@@ -35,13 +39,14 @@ class EndpointMonitor:
 
         print(f"Checking {url}...")
         resp = self.ws.send_message(f'checking this url: {url}', 1, 'Info')
-        print(resp)
         new_hash = get_page_hash(url)
-
         if new_hash:
-            if old_hash and new_hash != old_hash:
+            if (old_hash and new_hash != old_hash) or old_hash is None:
+                self.dao.add_change_record(page_id, 1, current_time)
                 print(f"!!! CHANGE DETECTED: {url} !!!")
-                # notify other
+            else:
+                self.dao.add_change_record(page_id, 0, current_time)
+                print(f"!!! CHANGE NOT DETECTED: {url} !!!")
 
             next_check = current_time + interval
             self.dao.update_check_result(page_id, new_hash, next_check)
